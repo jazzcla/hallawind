@@ -6,26 +6,39 @@ import json
 
 st.set_page_config(page_title="출석 기록", page_icon="🗓️")
 
+def _load_sa_info():
+    raw = st.secrets.get("gcp_service_account")
+    if raw is None:
+        raise ValueError("Secrets에 'gcp_service_account'가 없습니다. (Settings > Secrets에서 추가)")
+    # 1) 문자열(JSON)로 저장한 경우
+    if isinstance(raw, str):
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            raise ValueError("gcp_service_account가 문자열인데 JSON 형식이 아닙니다. "
+                             "큰따옴표 3개(\"\"\") 사이에 JSON 전체를 그대로 붙여넣었는지 확인하세요.")
+    # 2) TOML 테이블([gcp_service_account])로 저장한 경우
+    if isinstance(raw, dict):
+        return dict(raw)
+    raise ValueError("gcp_service_account 형식이 올바르지 않습니다. 문자열(JSON) 또는 테이블(TOML)이어야 합니다.")
+
 @st.cache_resource
 def get_ws():
-    # Secrets에 문자열로 넣은 JSON을 파싱
-    info = json.loads(st.secrets["gcp_service_account"])
+    info = _load_sa_info()
     scopes = [
         "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
+        "https://www.googleapis.com/auth/drive",
     ]
     creds = Credentials.from_service_account_info(info, scopes=scopes)
     gc = gspread.authorize(creds)
 
-    # 시트 열기
     sh = gc.open(st.secrets.get("SPREADSHEET_NAME", "출석부"))
     ws = sh.worksheet(st.secrets.get("WORKSHEET_NAME", "시트1"))
 
-    # 비어 있으면 헤더 보장
-    if not ws.get_all_values():
+    if not ws.get_all_values():  # 비어 있으면 헤더 보장
         ws.update("A1:B1", [["날짜", "출석 기록"]])
-
     return ws
+
 
 def write_record(name: str):
     if not name.strip():
@@ -72,5 +85,6 @@ st.markdown(
 이름이 다르면 Secrets에서 바꿔주세요.
 """
 )
+
 
 
