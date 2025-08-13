@@ -50,7 +50,7 @@ def write_record(name: str):
     except Exception as e:
         return f"오류: {e}", False
 
-st.title("출근 기록")
+st.title("출석 기록")
 st.caption("이름을 입력하고 [기록하기]를 누르면 구글 시트에 저장됩니다.")
 
 col1, col2 = st.columns([3,1])
@@ -72,4 +72,5 @@ st.markdown(
 이름이 다르면 Secrets에서 바꿔주세요.
 """
 )
+
 
