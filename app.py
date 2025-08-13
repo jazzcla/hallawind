@@ -4,7 +4,7 @@ from google.oauth2.service_account import Credentials
 from datetime import datetime
 import json
 
-st.set_page_config(page_title="출근 기록", page_icon="🗓️")
+st.set_page_config(page_title="출석 기록", page_icon="🗓️")
 
 @st.cache_resource
 def get_ws():
@@ -23,7 +23,7 @@ def get_ws():
 
     # 비어 있으면 헤더 보장
     if not ws.get_all_values():
-        ws.update("A1:B1", [["날짜", "출근 기록"]])
+        ws.update("A1:B1", [["날짜", "출석 기록"]])
 
     return ws
 
@@ -72,3 +72,4 @@ st.markdown(
 이름이 다르면 Secrets에서 바꿔주세요.
 """
 )
+
